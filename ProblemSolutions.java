@@ -1,6 +1,7 @@
+
 /******************************************************************
  *
- *   ADD YOUR NAME / SECTION NUMBER HERE
+ *   Wyatt Harris COMP 272 001
  *
  *   This java file contains the problem solutions of canFinish and
  *   numGroups methods.
@@ -72,19 +73,46 @@ class ProblemSolutions {
      * @return boolean          - True if all exams can be taken, else false.
      */
 
-    public boolean canFinish(int numExams, 
-                             int[][] prerequisites) {
-      
-        int numNodes = numExams;  // # of nodes in graph
+    public boolean canFinish(int numExams, int[][] prerequisites) {
+        //https://www.geeksforgeeks.org/detect-cycle-in-a-graph/
+        //Source for solution
 
         // Build directed graph's adjacency list
-        ArrayList<Integer>[] adj = getAdjList(numExams, 
-                                        prerequisites); 
+        ArrayList<Integer>[] adj = getAdjList(numExams,
+                prerequisites);
 
         // ADD YOUR CODE HERE - ADD YOUR NAME / SECTION AT TOP OF FILE
-        return false;
 
+        boolean[] visited = new boolean[numExams];
+        boolean[] recStack = new boolean[numExams];
+
+        // Try DFS from each unvisited node
+        for (int node = 0; node < numExams; node++) {
+            if (!visited[node]) {
+                if (DFSDetectCycle(node, adj, visited, recStack)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
+
+    private boolean DFSDetectCycle(int node, ArrayList<Integer>[] adj, boolean[] visited, boolean[] recStack) {
+        visited[node] = true;
+        recStack[node] = true;
+        for (int neighbor : adj[node]) {
+            if (!visited[neighbor]) {
+                if (DFSDetectCycle(neighbor, adj, visited, recStack)) {
+                    return true;
+                }
+            } else if (recStack[neighbor]) {
+                return true;
+            }
+        }
+        recStack[node] = false;
+        return false;
+    }
+
 
 
     /**
@@ -101,8 +129,8 @@ class ProblemSolutions {
     private ArrayList<Integer>[] getAdjList(
             int numNodes, int[][] edges) {
 
-        ArrayList<Integer>[] adj 
-                    = new ArrayList[numNodes];      // Create an array of ArrayList ADT
+        ArrayList<Integer>[] adj
+                = new ArrayList[numNodes];      // Create an array of ArrayList ADT
 
         for (int node = 0; node < numNodes; node++){
             adj[node] = new ArrayList<Integer>();   // Allocate empty ArrayList per node
@@ -181,7 +209,6 @@ class ProblemSolutions {
                     graph.putIfAbsent(i, new ArrayList());
                     // Add AdjList for node j if not there
                     graph.putIfAbsent(j, new ArrayList());
-
                     // Update node i adjList to include node j
                     graph.get(i).add(j);
                     // Update node j adjList to include node i
@@ -192,7 +219,23 @@ class ProblemSolutions {
 
         // YOUR CODE GOES HERE - you can add helper methods, you do not need
         // to put all code in this method.
-        return -1;
+
+        Set<Integer> visited = new HashSet<>();
+        int numGroups = 0;
+        for (int z = 0; z < numNodes; z++) {
+            if (!visited.contains(z)) {
+                DFSFindGroups(z, graph, visited);
+                numGroups++;
+            }
+        }
+        return numGroups;
     }
 
+    private void DFSFindGroups(int node, Map<Integer, List<Integer>> graph, Set<Integer> visited) {
+        if (visited.contains(node)) return;
+        visited.add(node);
+        for (int neighbor : graph.getOrDefault(node, new ArrayList<>())) {
+            DFSFindGroups(neighbor, graph, visited);
+        }
+    }
 }
